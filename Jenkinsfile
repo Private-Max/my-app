@@ -1,12 +1,11 @@
-pipeline{
-    agent any
-    stages{
-        stage("Nexus Download"){
-            steps{
-                withCredentials([usernamePassword(credentialsId: 'nexus3', passwordVariable: 'password', usernameVariable: 'userName')]) {
-                     sh "wget --user=${userName} --password=${password} '${params.nexusWarURL}'"
-                }
-            }
-        }
+node {
+  stage('SCM') {
+    checkout scm
+  }
+  stage('SonarQube Analysis') {
+    def mvn = tool 'Default Maven';
+    withSonarQubeEnv() {
+      sh "${mvn}/bin/mvn clean verify sonar:sonar -Dsonar.projectKey=sonar-prj-1"
     }
+  }
 }
